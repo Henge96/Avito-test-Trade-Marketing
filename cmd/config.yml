@@ -10,5 +10,5 @@ db:
   password: postgres
   hostdb: postgres
   portdb: 5432
-  name: postgres
+  namedb: postgres
   sslmode: disable

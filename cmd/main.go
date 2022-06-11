@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,40 +12,37 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/spf13/viper"
 
 	"depends/internal/api"
 	"depends/internal/app"
+	"depends/internal/config"
 	"depends/internal/repo"
 )
 
 func main() {
-	err := initConfig()
+	var configPath string
+
+	flag.StringVar(&configPath, "config", "./config.yml", "path to config file")
+
+	flag.Parse()
+
+	configStruct, err := config.TakeConfigFromYaml(configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	cfg := repo.Config{
-		Driver:   viper.GetString("db.driver"),
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		Password: viper.GetString("db.password"),
-		DBName:   viper.GetString("db.name"),
-		SSLMode:  viper.GetString("db.sslmode"),
-	}
 
-	err = run(cfg)
+	err = run(configStruct)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func run(cfg repo.Config) error {
+func run(cfg *config.Config) error {
 
-	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
+	db, err := sqlx.Open(cfg.DB.Driver, fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
+		cfg.DB.HostDB, cfg.DB.PortDB, cfg.DB.User, cfg.DB.NameDB, cfg.DB.Password, cfg.DB.SSLMode))
 	if err != nil {
-		return fmt.Errorf("sqlx.Connect: %w", err)
+		return fmt.Errorf("sqlx.Open: %w", err)
 	}
 	defer db.Close()
 	rep := repo.New(db)
@@ -52,7 +50,7 @@ func run(cfg repo.Config) error {
 	ap := app.New(rep)
 
 	server := &http.Server{
-		Addr:    viper.GetString("server.host") + viper.GetString("server.port"),
+		Addr:    cfg.Server.Host + ":" + cfg.Server.Port.Http,
 		Handler: api.NewRouter(ap),
 	}
 
@@ -70,7 +68,7 @@ func run(cfg repo.Config) error {
 
 	<-chanSig
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(viper.GetInt("server.timeout.server_timeout"))*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.Timeout.ServerTimeout)*time.Second)
 	defer cancel()
 
 	err = server.Shutdown(ctx)
@@ -79,11 +77,4 @@ func run(cfg repo.Config) error {
 	}
 
 	return nil
-
-}
-
-func initConfig() error {
-	viper.AddConfigPath("cmd")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
 }

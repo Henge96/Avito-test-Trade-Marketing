@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 // Middleware func
@@ -21,10 +22,7 @@ func (a Api) Save(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if event.Date.DateStartedAt == "" {
-		log.Println("bad request")
-		return
-	}
+	time.Date()
 
 	err = a.app.SaveEvent(r.Context(), event)
 	if err != nil {
@@ -77,3 +75,5 @@ func (a Api) Delete(_ http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+type (e Event) Validation()

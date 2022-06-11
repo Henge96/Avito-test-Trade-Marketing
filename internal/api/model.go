@@ -1,24 +1,22 @@
 package api
 
 type Event struct {
-	Date   Date    `json:"date"`
-	Views  uint    `json:"views"`
-	Clicks uint    `json:"clicks"`
-	Cost   float64 `json:"cost"`
+	Date   string `json:"date"`
+	Views  uint   `json:"views"`
+	Clicks uint   `json:"clicks"`
+	Cost   string `json:"cost"`
 }
 
-type Date struct {
-	DateStartedAt string `json:"date_started_at"`
-	StartPeriod   string `json:"start_period"`
-	EndPeriod     string `json:"end_period"`
+type EventPeriod struct {
+	StartedAt string `json:"started_at"`
+	EndedAt   string `json:"ended_at"`
 }
 
-type Request struct {
-	Id     int     `json:"id"`
-	Date   string  `json:"date_request"`
-	Views  uint    `json:"views_request"`
-	Clicks uint    `json:"clicks_request"`
-	Cost   float64 `json:"cost_request"`
-	Cpc    float64 `json:"cpc"`
-	Cpm    float64 `json:"cpm"`
+type Response struct {
+	Date   string `json:"date"`
+	Views  uint   `json:"views"`
+	Clicks uint   `json:"clicks"`
+	Cost   string `json:"cost"`
+	Cpc    string `json:"cpc"`
+	Cpm    string `json:"cpm"`
 }
