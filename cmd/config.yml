@@ -1,0 +1,14 @@
+server:
+  host: 0.0.0.0
+  port:
+    http: 8000
+  timeout:
+    server_timeout: 30
+db:
+  driver: postgres
+  username: postgres
+  password: postgres
+  hostdb: postgres
+  portdb: 5432
+  name: postgres
+  sslmode: disable
